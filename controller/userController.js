@@ -6,115 +6,116 @@ import generateToken from "../utils/token.js";
 import getUserByEmail from "../utils/getUserByEmail.js";
 import fs from "fs";
 
-// SIGN UP USER
+// ** SIGN UP USER **
 const createAUser = async (req, res) => {
   try {
-    // GET USER DATA
-    const { email, password, firstName, lastName } = req.body;
+    const { name, phone, password } = req.body;
 
-    // confirm credentials
-    if (!email || !password || !firstName || !lastName) {
+    // checked credentials
+    if (!name || !phone || !password) {
       return res.status(400).json({
         status: "fail",
-        error: "Please provide your credentials",
+        message: "Please provide your credentials",
       });
     }
 
-    const isEmail = await getUserByEmail(email);
-
-    if (isEmail) {
+    // checked if phone number is from BD
+    if (phone[0] !== "0" || phone[1] !== "1") {
       return res.status(400).json({
         status: "fail",
-        error: "email alredy in use",
+        message: "Please provide a correct phone number",
       });
     }
 
-    // check password length
-    if (password.length < 5) {
+    // check if user already exists
+    const oldUser = await User.findOne({ phone });
+    if (oldUser) {
       return res.status(400).json({
         status: "fail",
-        error: "password should be five character or more",
+        message: "Number already in use",
       });
     }
 
-    // ENCRYPT PASSWORD
-    const hashPassword = (password) => {
-      const solt = 10;
-      const hashPassword = bcrypt.hash(password, solt);
-      return hashPassword;
-    };
+    // hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashPassword = await bcrypt.hash(password, salt);
 
-    const newPassword = await hashPassword(password);
+    // fix unique email problem
+    function generateRandomHex() {
+      let hex = "";
+      for (let i = 0; i < 6; i++) {
+        hex += Math.floor(Math.random() * 16).toString(16);
+      }
+      return hex;
+    }
+    const randomNumber = generateRandomHex();
+    const email = `example${randomNumber}@gamil.com`;
 
-    // USER DATA FOR DATABASE
+    // create user data
     const userData = {
-      firstName,
-      lastName,
+      name,
+      phone,
+      password: hashPassword,
       email,
-      password: newPassword,
     };
 
-    // save user to database
+    // send data to database
     const user = new User(userData);
-
     const result = await user.save();
 
-    // send response to client
+    // send response
     res.status(200).json({
       status: "success",
+      message: "User created successfully",
       result,
     });
   } catch (error) {
     res.status(400).json({
       status: "fail",
-      error: error.message,
+      message: error.message,
+      error,
     });
   }
 };
 
-// USER LOGIN
+// ** USER LOGIN **
 const userLogIn = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { phone, password } = req.body;
 
-    // GET  CREDENTIALS
-    if (!email || !password) {
+    // get credentials
+    if (!phone || !password) {
       return res.status(400).json({
         status: "fail",
-        error: "Please provide your credentials",
+        message: "Please provide your credentials",
       });
     }
 
-    // FIND USER
-    const user = await User.findOne({ email: email });
+    // find user
+    const user = await User.findOne({ phone });
     if (!user) {
       return res.status(400).json({
         status: "fail",
-        error: "No user found",
+        message: "No user found",
       });
     }
 
-    // CHECK PASSWORD
+    // check password
     const checkPassword = await bcrypt.compare(password, user.password);
     if (!checkPassword) {
       return res.status(400).json({
         status: "fail",
-        error: "wrong password",
+        message: "wrong password",
       });
     }
 
-    // GENERATE TOKEN
+    // generate token
     const token = generateToken(user);
 
-    // CLIENT DATA
-    const userData = {
-      _id: user._id,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email,
-      role: user.role,
-    };
+    // client data
+    const userData = await User.findOne({ phone }).select("-password");
 
+    // send response
     res.status(200).json({
       status: "success",
       message: "User sign in successfully",
@@ -126,61 +127,23 @@ const userLogIn = async (req, res) => {
   } catch (error) {
     res.status(400).json({
       status: "fail",
-      error: error.message,
+      message: error.message,
     });
   }
 };
 
-// SEND USER DATA TO CLIENT SIDE
+// ** SEND USER DATA TO CLIENT SIDE **
 const getUser = async (req, res) => {
   try {
-    // GET USER DATA
+    // get user data
     const user = req.user;
-    const alert = user?.alert;
 
-    // USER DATA
-    let userData = {};
-    if (alert.status) {
-      console.log('hited')
-      // data
-      userData = {
-        _id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        photo: user.photo,
-        role: user.role,
-        alert: {
-          status: true,
-          res: alert.res,
-          message: alert.message,
-        },
-      };
+    // find user data
+    const userData = await User.findOne({ phone: user.phone }).select(
+      "-password"
+    );
 
-      // function
-      user.alert = {
-        status: false,
-      };
-
-      const query = {
-        email: user.email,
-      };
-
-      const update = await User.updateOne(query, { $set: user });
-    } else {
-      userData = {
-        _id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        photo: user.photo,
-        role: user.role,
-        alert: {
-          status: false,
-        },
-      };
-    }
-
+    // send response
     res.status(200).json({
       status: "success",
       userData,
@@ -188,66 +151,173 @@ const getUser = async (req, res) => {
   } catch (error) {
     res.status(400).json({
       status: "fail",
-      error: error.message,
+      message: error.message,
     });
   }
 };
 
+// ** UPDATE USER **
 const updateUserProfile = async (req, res) => {
   try {
-    // GET USER DATA
-    const userData = req.body;
+    // get update information
+    const { name, email, photo, nid, newPhone } = req.body;
 
-    // QUERY
+    // query
+    const { phone } = req.body;
     const query = {
-      email: userData.email,
+      phone: phone,
     };
 
-    // FIND USER
+    // get user form database
     const user = await User.findOne(query);
     if (!user) {
-      res.status(400).json({
+      return res.status(400).json({
         status: "fail",
-        error: "No user found",
+        message: "User not found",
       });
     }
+    // update user information
+    if (name) {
+      user.name = name;
+    }
+    if (email) {
+      user.email = email;
+    }
+    if (photo) {
+      user.photo = photo;
+    }
+    if (nid) {
+      user.nid = nid;
+    }
+    if (newPhone) {
+      user.phone = newPhone;
+    }
 
-    // UPDATE USER DATA
-    user.firstName = userData.firstName;
-    user.lastName = userData.lastName;
-    user.photo = userData.photo;
-    user.higth = userData.higth;
-    user.age = userData.age;
-    user.workTime = userData.workTime;
-
-    // UPDATE USER
     const result = await User.updateOne(query, { $set: user });
 
+    // send response
     res.status(200).json({
       status: "success",
+      message: "User updated successfully",
       result,
     });
   } catch (error) {
     res.status(400).json({
       status: "fail",
-      error: error.message,
+      message: error.message,
     });
   }
 };
 
+// ** GET ALL USERS **
 const getAllUser = async (req, res) => {
   try {
+    // find all users
     const allUser = await User.find({});
 
+    // send response
     res.json({
       allUser,
     });
   } catch (error) {
     res.status(400).json({
       status: "fail",
-      error: error.message,
+      message: error.message,
     });
   }
 };
 
-export { createAUser, getUser, userLogIn, updateUserProfile, getAllUser };
+// ** DELETE USER **
+const deleteUser = async (req, res) => {
+  try {
+    // get phone number from query parameters
+    const phone = req.query.phone;
+
+    // query
+    const query = { phone: phone };
+
+    // check user
+    const user = await User.findOne(query);
+    if (!user) {
+      return res.status(400).json({
+        status: "fail",
+        message: "User not found",
+      });
+    }
+
+    // delete user from database
+    const result = await User.findOneAndDelete(query);
+
+    // send response
+    res.status(200).json({
+      status: "success",
+      message: "User deleted successfully",
+      result,
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: "fail",
+      message: error.message,
+    });
+  }
+};
+
+const changeUserPassword = async (req, res) => {
+  try {
+    // get information
+    const { oldPassword, newPassword, phone } = req.body;
+
+    // query
+    const query = { phone: phone };
+
+    // check user
+    const user = await User.findOne(query);
+    if (!user) {
+      return res.status(400).json({
+        status: "fail",
+        message: "User not found",
+      });
+    }
+
+    // check old password
+    const checkOldPassword = await bcrypt.compare(oldPassword, user.password);
+    if (!checkOldPassword) {
+      return res.status(400).json({
+        status: "fail",
+        message: "wrong old password",
+      });
+    }
+
+    // hash new password
+    const slot = await bcrypt.genSalt(10); // salt rounds
+    const hashPassword = await bcrypt.hash(newPassword, slot);
+
+    // update user status
+    user.password = hashPassword;
+
+    // update user in database
+    const result = await User.updateOne(query, { $set: user });
+
+    // send response
+    res.status(200).json({
+      status: "success",
+      message: "User password updated successfully",
+      result,
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: "fail",
+      message: error.message,
+    });
+  }
+};
+
+export {
+  createAUser,
+  getUser,
+  userLogIn,
+  updateUserProfile,
+  getAllUser,
+  deleteUser,
+  changeUserPassword
+};
