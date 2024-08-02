@@ -6,6 +6,7 @@ import colors from "colors";
 import connectDB from "./config/db.js";
 import userRouter from "./routes/userRoute.js";
 import vendorRouter from "./routes/vendorRoutes.js";
+import categoryRouter from "./routes/categoryRoutes.js";
 
 // APP
 const app = express();
@@ -21,6 +22,7 @@ app.use(morgan("dev"));
 // ROUTES
 app.use("/api/v1/auth/user", userRouter);
 app.use("/api/v1/auth/vendor", vendorRouter);
+app.use("/api/v1/category", categoryRouter);
 
 // HOMEPAGE
 app.get("/", (req, res) => {

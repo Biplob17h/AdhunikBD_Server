@@ -10,6 +10,7 @@ import fs from "fs";
 const createAUser = async (req, res) => {
   try {
     const { name, phone, password } = req.body;
+    console.log(phone.length);
 
     // checked credentials
     if (!name || !phone || !password) {
@@ -20,7 +21,7 @@ const createAUser = async (req, res) => {
     }
 
     // checked if phone number is from BD
-    if (phone[0] !== "0" || phone[1] !== "1") {
+    if (phone[0] !== "0" || phone[1] !== "1" || phone.length !== 11) {
       return res.status(400).json({
         status: "fail",
         message: "Please provide a correct phone number",
@@ -160,7 +161,7 @@ const getUser = async (req, res) => {
 const updateUserProfile = async (req, res) => {
   try {
     // get update information
-    const { name, email, photo, nid, newPhone } = req.body;
+    const { name, email, nid, dateOfBirth, gender, address } = req.body;
 
     // query
     const { phone } = req.body;
@@ -183,14 +184,17 @@ const updateUserProfile = async (req, res) => {
     if (email) {
       user.email = email;
     }
-    if (photo) {
-      user.photo = photo;
-    }
     if (nid) {
       user.nid = nid;
     }
-    if (newPhone) {
-      user.phone = newPhone;
+    if (dateOfBirth) {
+      user.dateOfBirth = dateOfBirth;
+    }
+    if (gender) {
+      user.gender = gender;
+    }
+    if (address) {
+      user.address = address;
     }
 
     const result = await User.updateOne(query, { $set: user });
@@ -319,5 +323,5 @@ export {
   updateUserProfile,
   getAllUser,
   deleteUser,
-  changeUserPassword
+  changeUserPassword,
 };

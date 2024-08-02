@@ -31,6 +31,7 @@ const userSchema = new mongoose.Schema({
     required: true,
     minLength: [6, "password is too short"], // Minimum length for password
   },
+
   role: {
     type: String,
     enum: ["user", "vendor", "admin"],
@@ -41,6 +42,18 @@ const userSchema = new mongoose.Schema({
     default: "",
   },
   nid: {
+    type: String,
+    default: "",
+  },
+  address: {
+    type: String,
+    default: "",
+  },
+  dateOfBirth: {
+    type: String,
+    default: "",
+  },
+  gender: {
     type: String,
     default: "",
   },
