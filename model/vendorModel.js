@@ -6,7 +6,7 @@ const vendorSchema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true,
-    minLength: [5, "name is too short"],
+    minLength: [3, "name is too short"],
     maxLength: [50, "name is too long"],
   },
   shopName: {
@@ -63,8 +63,12 @@ const vendorSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["active", "inactive", "blocked", "rejected"],
-    default: "inactive",
+    enum: ["active", "pending", "blocked", "rejected"],
+    default: "pending",
+  },
+  notification : {
+    type : Array,
+    default : []
   },
   createdAt: {
     type: Date,

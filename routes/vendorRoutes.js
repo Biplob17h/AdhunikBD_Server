@@ -1,15 +1,17 @@
 import express from "express";
 import {
+  addVendorShopPhoto,
   createAVendor,
+  deleteAShopPhoto,
   deleteVendorProfile,
   getAllVendor,
   getVendor,
   updateVendorPassword,
   updateVendorProfile,
-  updateVendorStatus,
   vendorLogIn,
 } from "../controller/vendorControllers.js";
 import verifyUser from "../utils/verifyUser.js";
+import verifyVendor from "../utils/verifyVendor.js";
 
 const vendorRouter = express.Router();
 
@@ -19,14 +21,15 @@ vendorRouter.post("/signin", vendorLogIn);
 
 // ALL GETS
 vendorRouter.get("/allVendors", getAllVendor);
-vendorRouter.get("/getVendor", verifyUser, getVendor);
+vendorRouter.get("/getVendor", verifyVendor, getVendor);
 
 // ALL UPDATES
 vendorRouter.patch("/updateVendor", updateVendorProfile);
-vendorRouter.patch("/updateVendorStatus", updateVendorStatus);
-vendorRouter.patch("/updateVendorPassword", updateVendorPassword)
+vendorRouter.patch("/updateVendorPassword", updateVendorPassword);
+vendorRouter.patch("/addAShopPhoto", addVendorShopPhoto);
+vendorRouter.patch("/removeAShopPhoto", deleteAShopPhoto);
 
 // ALL DELETES
-vendorRouter.delete('/deleteVendor', deleteVendorProfile);
+vendorRouter.delete("/deleteVendor", deleteVendorProfile);
 
 export default vendorRouter;

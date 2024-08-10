@@ -1,7 +1,8 @@
 import jwt from "jsonwebtoken";
 import { promisify } from "util";
 import User from "../model/userModel.js";
-const verifyUser = async (req, res, next) => {
+import Vendor from "../model/vendorModel.js";
+const verifyVendor = async (req, res, next) => {
   try {
     // get token 
     const token = await req.headers?.authorization?.split(" ")[1];
@@ -17,7 +18,7 @@ const verifyUser = async (req, res, next) => {
       process.env.JWT_TOKEN_SECRET
     );
 
-    const user = await User.findOne({ phone: decode?.phone });
+    const user = await Vendor.findOne({ phone: decode?.phone });
 
     req.user = user;
 
@@ -30,4 +31,4 @@ const verifyUser = async (req, res, next) => {
   }
 };
 
-export default verifyUser;
+export default verifyVendor;

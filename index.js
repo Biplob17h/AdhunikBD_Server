@@ -7,6 +7,8 @@ import connectDB from "./config/db.js";
 import userRouter from "./routes/userRoute.js";
 import vendorRouter from "./routes/vendorRoutes.js";
 import categoryRouter from "./routes/categoryRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
+import applicationRoutes from "./routes/applicationRoutes.js";
 
 // APP
 const app = express();
@@ -23,12 +25,13 @@ app.use(morgan("dev"));
 app.use("/api/v1/auth/user", userRouter);
 app.use("/api/v1/auth/vendor", vendorRouter);
 app.use("/api/v1/category", categoryRouter);
+app.use("/api/v1/admin", adminRoutes);
+app.use("/api/v1/application", applicationRoutes);
 
 // HOMEPAGE
 app.get("/", (req, res) => {
   res.send(`<h1>Welcome to Adhunik BD Homepage</h1>`);
 });
-
 
 // LISTEN
 const port = process.env.PORT || 8080;
