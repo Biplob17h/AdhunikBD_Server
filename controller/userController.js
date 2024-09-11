@@ -10,7 +10,6 @@ import fs from "fs";
 const createAUser = async (req, res) => {
   try {
     const { name, phone, password } = req.body;
-    console.log(phone.length);
 
     // checked credentials
     if (!name || !phone || !password) {
@@ -50,7 +49,7 @@ const createAUser = async (req, res) => {
       return hex;
     }
     const randomNumber = generateRandomHex();
-    const email = `example${randomNumber}@gamil.com`;
+    const email = `example${randomNumber}@gmail.com`;
 
     // create user data
     const userData = {
@@ -111,10 +110,10 @@ const userLogIn = async (req, res) => {
     }
 
     // generate token
-    const token = generateToken(user);
+    const token = generateToken(user._id, res);
 
     // client data
-    const userData = await User.findOne({ phone }).select("-password");
+    const userData = await User.findOne({ phone }).select(["-password", "-_id"]);
 
     // send response
     res.status(200).json({
@@ -157,6 +156,23 @@ const getUser = async (req, res) => {
   }
 };
 
+// ** USER LOGOUT **
+const userLogout = async (req, res) => {
+  try {
+    res.cookie("adhunik_token", "", { expires: 0 });
+
+    res.status(200).json({
+      status: "success",
+      message: "User logged out successfully",
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: "fail",
+      message: error.message,
+    });
+  }
+};
+
 // ** UPDATE USER **
 const updateUserProfile = async (req, res) => {
   try {
@@ -170,7 +186,7 @@ const updateUserProfile = async (req, res) => {
     };
 
     // get user form database
-    const user = await User.findOne(query);
+    const user = await User.findOne(query).select(["-_id", "-password"])
     if (!user) {
       return res.status(400).json({
         status: "fail",
@@ -204,6 +220,7 @@ const updateUserProfile = async (req, res) => {
       status: "success",
       message: "User updated successfully",
       result,
+      user
     });
   } catch (error) {
     res.status(400).json({
@@ -324,4 +341,5 @@ export {
   getAllUser,
   deleteUser,
   changeUserPassword,
+  userLogout,
 };

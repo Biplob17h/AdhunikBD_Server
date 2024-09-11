@@ -7,6 +7,7 @@ import {
   getUser,
   updateUserProfile,
   userLogIn,
+  userLogout,
 } from "../controller/userController.js";
 import verifyUser from "../utils/verifyUser.js";
 
@@ -14,7 +15,8 @@ const userRouter = express.Router();
 
 // ALL POSTS
 userRouter.post("/signup", createAUser);
-userRouter.post("/signin", userLogIn);
+userRouter.post("/login", userLogIn);
+userRouter.post("/logout", userLogout);
 
 // ALL GETS
 userRouter.get("/allUsers", getAllUser);

@@ -1,32 +1,19 @@
 import express from "express";
-import {
-  createCategory,
-  createSubcategory,
-  deleteACategory,
-  deleteASubcategory,
-  getACategory,
-  getAllCategories,
-  updateCategoryName,
-  updateSubcategoryName,
-} from "../controller/categoryControllers.js";
+import { createACategory, deleteACategory, getAllCategory, getSingleCategory, updateACategory } from "../controller/categoryControllers.js";
 
-const categoryRouter = express.Router();
+const categoryRoute = express.Router();
 
-// ALL POSTS
-categoryRouter.post("/createCategory", createCategory);
-categoryRouter.post('/createSubcategory', createSubcategory);
+// all post
+categoryRoute.post("/create", createACategory);
 
-// ALL GETS
-categoryRouter.get("/allCategories", getAllCategories);
-categoryRouter.get("/getCategory/:categoryId", getACategory);
+// all gets
+categoryRoute.get("/single", getSingleCategory);
+categoryRoute.get("/all", getAllCategory);
 
-// ALL UPDATES
-categoryRouter.patch('/updateCategoryName', updateCategoryName);
-categoryRouter.patch('/updateSubCategoryName', updateSubcategoryName);
+// all update
+categoryRoute.patch("/update", updateACategory);
 
+// delete a category
+categoryRoute.delete("/delete", deleteACategory);
 
-// ALL DELETES
-categoryRouter.delete("/deleteCategory/:categoryId", deleteACategory);
-categoryRouter.delete("/deleteSubCategory", deleteASubcategory);
-
-export default categoryRouter;
+export default categoryRoute;

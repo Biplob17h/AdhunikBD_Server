@@ -1,16 +1,21 @@
 import mongoose from "mongoose";
 
 const categorySchema = new mongoose.Schema({
-  category: {
+  subCategory: {
     type: String,
     required: true,
     trim: true,
     unique: [true, "category Name must be unique"],
     maxLength: [50, "name is too long"],
   },
-  subcategories: {
-    type: Array,
-    default: [],
+  photo: {
+    type: String,
+    required: true,
+    default : "",
+  },
+  categorySlug: {
+    type: String,
+    required: true,
   },
 });
 
