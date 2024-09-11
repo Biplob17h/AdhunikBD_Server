@@ -18,3 +18,7 @@ const serviceSchema = new mongoose.Schema({
         ref : 'SubCategory'
     }
 })
+
+const Service = mongoose.model('Service', serviceSchema)
+
+export default Service
