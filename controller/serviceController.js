@@ -4,7 +4,7 @@ import SubCategory from "../model/subCategoryModel.js";
 // Create a new Service
 export const createAService = async (req, res) => {
   try {
-    const { name, price, categorySlug, subCategoryId } = req.body;
+    const { name, price, categoryId, subCategoryId } = req.body;
 
     // Find the subcategory to ensure it exists
     const subCategory = await SubCategory.findById(subCategoryId);
@@ -19,7 +19,7 @@ export const createAService = async (req, res) => {
     const service = new Service({
       name,
       price,
-      categorySlug,
+      categoryId,
       subCategoryId,
     });
 
@@ -43,7 +43,7 @@ export const getAService = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const service = await Service.findById({ _id: id });
+    const service = await Service.findById({ _id: id }).populate(['subCategoryId', "categoryId"])
     if (!service) {
       return res.status(404).json({
         status: "fail",
@@ -66,7 +66,7 @@ export const getAService = async (req, res) => {
 // Get all Services
 export const getAllServices = async (req, res) => {
   try {
-    const services = await Service.find({});
+    const services = await Service.find();
     return res.status(200).json({
       status: "success",
       data: services,
@@ -81,7 +81,7 @@ export const getAllServices = async (req, res) => {
 
 export const getAllServiceForASubCategory = async (req, res) => {
   try {
-    const { subCategoryId } = req.query;
+    const { subCategoryId } = req.params;
 
     const services = await Service.find({ subCategoryId });
     if (!services) {
@@ -104,7 +104,7 @@ export const getAllServiceForASubCategory = async (req, res) => {
 
 export const updateAService = async (req, res) => {
   try {
-    const { name, price, categorySlug, subCategoryId, serviceId } = req.body;
+    const { name, price, serviceId } = req.body;
 
     // Find the service by ID
     const service = await Service.findById({ _id: serviceId });
@@ -141,7 +141,7 @@ export const deleteAService = async (req, res) => {
   try {
     const { serviceId } = req.query;
 
-    const result = await Service.findByIdAndDelete({ _id: serviceId });
+    const service = await Service.findByIdAndDelete({ _id: serviceId });
     if (!service) {
       return res.status(404).json({
         status: "fail",

@@ -9,13 +9,13 @@ const serviceSchema = new mongoose.Schema({
         type : Number,
         required : true
     },
-    categorySlug : {
-        type : String,
-        required : true
+    categoryId : {
+        type : mongoose.Schema.Types.ObjectId,
+        ref : "categories"
     },
     subCategoryId : {
         type : mongoose.Schema.Types.ObjectId,
-        ref : 'SubCategory'
+        ref : 'SubCategories'
     }
 })
 

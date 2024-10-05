@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  addNewService,
   addVendorShopPhoto,
   createAVendor,
   deleteAShopPhoto,
@@ -28,6 +29,7 @@ vendorRouter.patch("/updateVendor", updateVendorProfile);
 vendorRouter.patch("/updateVendorPassword", updateVendorPassword);
 vendorRouter.patch("/addAShopPhoto", addVendorShopPhoto);
 vendorRouter.patch("/removeAShopPhoto", deleteAShopPhoto);
+vendorRouter.patch("/update/service", addNewService);
 
 // ALL DELETES
 vendorRouter.delete("/deleteVendor", deleteVendorProfile);

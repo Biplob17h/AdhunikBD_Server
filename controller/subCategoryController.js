@@ -1,9 +1,10 @@
+import Category from "../model/categoryModel.js";
 import SubCategory from "../model/subCategoryModel.js";
 
 export const createASubCategory = async (req, res) => {
   try {
-    const { subCategory, categorySlug } = req.body;
-    const newSubcategory = new SubCategory({ subCategory, categorySlug });
+    const { subCategory, categoryId, photo } = req.body;
+    const newSubcategory = new SubCategory({ subCategory, categoryId, photo });
     const result = await newSubcategory.save();
     res.status(201).json({
       status: "success",
@@ -18,7 +19,7 @@ export const createASubCategory = async (req, res) => {
 };
 export const getSingleSubCategory = async (req, res) => {
   try {
-    const { id } = req.query;
+    const { id } = req.params;
     const subcategory = await SubCategory.findOne({ _id: id });
     if (!subcategory) {
       return res.status(404).json({
@@ -26,8 +27,11 @@ export const getSingleSubCategory = async (req, res) => {
         message: "Subcategory not found",
       });
     }
+    const categoryId = subcategory.categoryId;
+    const category = await Category.findOne({ _id: categoryId });
     res.status(200).json({
       status: "success",
+      category,
       subcategory,
     });
   } catch (error) {
@@ -39,17 +43,22 @@ export const getSingleSubCategory = async (req, res) => {
 };
 export const getAllSubCategory = async (req, res) => {
   try {
-    const { slug } = req.query;
-    console.log(slug);
-    const subcategories = await SubCategory.find({ categorySlug: slug });
+    const { categoryId } = req.query;
+    const subcategories = await SubCategory.find({ categoryId });
     if (!subcategories) {
       return res.status(404).json({
         status: "fail",
         message: "Subcategories not found",
       });
     }
+
+    // find the category
+    const category = await Category.findOne({ _id: categoryId });
+
+    // send response
     res.status(200).json({
       status: "success",
+      category,
       subcategories,
     });
   } catch (error) {
@@ -104,7 +113,7 @@ export const updateAService = async (req, res) => {
     const subCategory = await SubCategory.findOne({
       _id: subCategoryId,
     });
-    
+
     if (!subCategory) {
       return res.status(404).json({
         status: "fail",
@@ -250,10 +259,25 @@ export const deleteAService = async (req, res) => {
   }
 };
 
-
-
 export const updateASubCategory = async (req, res) => {
   try {
+    const { subcategoryId, subCategoryUpdate } = req.body;
+    const subcategory = await SubCategory.findByIdAndUpdate(
+      subcategoryId,
+      subCategoryUpdate,
+      { new: true }
+    );
+    if (!subcategory) {
+      return res.status(404).json({
+        status: "fail",
+        message: "Subcategory not found",
+      });
+    }
+    res.status(200).json({
+      status: "success",
+      message: "Subcategory updated successfully",
+      subcategory,
+    });
   } catch (error) {
     res.status(400).json({
       status: "fail",
@@ -263,6 +287,18 @@ export const updateASubCategory = async (req, res) => {
 };
 export const deleteASubCategory = async (req, res) => {
   try {
+    const { id } = req.params;
+    const result = await SubCategory.findByIdAndDelete({ _id: id });
+    if (!result) {
+      return res.status(404).json({
+        status: "fail",
+        message: "Subcategory not found",
+      });
+    }
+    res.status(200).json({
+      status: "success",
+      message: "Subcategory deleted successfully",
+    });
   } catch (error) {
     res.status(400).json({
       status: "fail",
@@ -270,3 +306,41 @@ export const deleteASubCategory = async (req, res) => {
     });
   }
 };
+
+export const getASingleService = async (req, res) => {
+  try {
+    const { subCategoryId, serviceId } = req.params;
+    const subcategory = await SubCategory.findOne({
+      _id: subCategoryId,
+    });
+    if (!subcategory) {
+      return res.status(404).json({
+        status: "fail",
+        message: "Subcategory not found",
+      });
+    }
+    const service = subcategory.serviceFeatures.find(
+      (service) => service._id.toString() === serviceId
+    );
+    if (!service) {
+      return res.status(404).json({
+        status: "fail",
+        message: "Service not found",
+        subCategoryId,
+        serviceId,
+        subcategory,
+      });
+    }
+    res.status(200).json({
+      status: "success",
+      message: "Service found successfully",
+      service,
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: "fail",
+      message: error.message,
+    });
+  }
+};
+

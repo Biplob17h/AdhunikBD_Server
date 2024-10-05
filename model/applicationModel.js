@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const applicationSchema = mongoose.Schema({
+const applicationSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: ["new", "read"],

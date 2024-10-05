@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const categorySchema = new mongoose.Schema({
-  subCategory: {
+  category: {
     type: String,
     required: true,
     trim: true,
@@ -11,11 +11,7 @@ const categorySchema = new mongoose.Schema({
   photo: {
     type: String,
     required: true,
-    default : "",
-  },
-  categorySlug: {
-    type: String,
-    required: true,
+    default: "",
   },
 });
 

@@ -12,9 +12,17 @@ import mongoose from "mongoose";
 // **VENDOR SIGN UP  **
 const createAVendor = async (req, res) => {
   try {
-    const { vendorName, shopName, shopAddress, phone, password } = req.body;
+    const { vendorName, shopName, shopAddress, phone, password, services } =
+      req.body;
     // checked credentials
-    if (!vendorName || !shopName || !shopAddress || !phone || !password) {
+    if (
+      !vendorName ||
+      !shopName ||
+      !shopAddress ||
+      !phone ||
+      !password ||
+      !services
+    ) {
       return res.status(400).json({
         status: "fail",
         message: "please provide your credentials",
@@ -64,7 +72,9 @@ const createAVendor = async (req, res) => {
       shopPhoto: [],
       nid: "",
       status: "pending",
+      service: services,
     };
+    console.log(vendorData);
 
     const vendorApplication = {
       status: "new",
@@ -128,7 +138,9 @@ const vendorLogIn = async (req, res) => {
     }
 
     // generate token
-    const token = generateToken(vendor);
+    const token = generateToken(vendor._id, res);
+
+    console.log(token);
 
     // client data
     const vendorData = await Vendor.findOne({ phone }).select("-password");
@@ -154,12 +166,7 @@ const vendorLogIn = async (req, res) => {
 const getVendor = async (req, res) => {
   try {
     // get vendor data
-    const user = req.user;
-
-    // find vendor data
-    const vendorData = await Vendor.findOne({ phone: user.phone }).select(
-      "-password"
-    );
+    const vendorData = req.vendor;
 
     // send response
     res.status(200).json({
@@ -416,7 +423,7 @@ const deleteAShopPhoto = async (req, res) => {
 const getAllVendor = async (req, res) => {
   try {
     // find all Vendors
-    const vendors = await Vendor.find({});
+    const vendors = await Vendor.find({ status: "active" });
 
     // send response
     res.status(200).json({
@@ -517,6 +524,43 @@ const updateVendorPassword = async (req, res) => {
   }
 };
 
+const addNewService = async (req, res) => {
+  try {
+    // get vendor phone number and service
+    const { phone, service } = req.body;
+    // get vendor form database
+    const vendor = await Vendor.findOne({ phone });
+    if (!vendor) {
+      return res.status(400).json({
+        status: "fail",
+        message: "Vendor not found",
+      });
+    }
+    // check vendor status
+
+    if (vendor.status === "blocked" || vendor.status === "rejected") {
+      return res.status(400).json({
+        status: "fail",
+        message: "Vendor status blocked or rejected",
+      });
+    }
+
+    // update your service
+    vendor.service.push({ serviceName: service });
+    const result = await Vendor.updateOne({ phone }, { $set: vendor });
+    res.status(200).json({
+      status: "success",
+      message: "New service added successfully",
+      result,
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: "fail",
+      message: error.message,
+    });
+  }
+};
+
 export {
   createAVendor,
   vendorLogIn,
@@ -527,4 +571,5 @@ export {
   updateVendorPassword,
   addVendorShopPhoto,
   deleteAShopPhoto,
+  addNewService,
 };

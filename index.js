@@ -12,6 +12,7 @@ import adminRoutes from "./routes/adminRoutes.js";
 import applicationRoutes from "./routes/applicationRoutes.js";
 import subCategoryRoute from "./routes/subCategoryRoutes.js";
 import serviceRoute from "./routes/serviceRoute.js";
+import orderRoute from "./routes/orderRoutes.js";
 
 // APP
 const app = express();
@@ -33,6 +34,7 @@ app.use("/api/v1/subCategory", subCategoryRoute);
 app.use("/api/v1/admin", adminRoutes);
 app.use("/api/v1/application", applicationRoutes);
 app.use("/api/v1/service", serviceRoute);
+app.use("/api/v1/order", orderRoute);
 
 // HOMEPAGE
 app.get("/", (req, res) => {

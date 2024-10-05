@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const subCategorySchema = mongoose.Schema({
+const subCategorySchema = new mongoose.Schema({
   subCategory: {
     type: String,
     required: true,
@@ -9,9 +9,9 @@ const subCategorySchema = mongoose.Schema({
     type: String,
     default: "",
   },
-  categorySlug: {
-    type: String,
-    required: true,
+  categoryId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Categories",
   },
   serviceFeatures: [
     {

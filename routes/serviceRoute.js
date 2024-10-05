@@ -9,7 +9,7 @@ serviceRoute.post('/create', createAService)
 // all gets
 serviceRoute.get('/single/:id', getAService)
 serviceRoute.get('/all', getAllServices)
-serviceRoute.get('/subCategory', getAllServiceForASubCategory)
+serviceRoute.get('/subCategory/:subCategoryId', getAllServiceForASubCategory)
 
 // all update 
 serviceRoute.patch('/update', updateAService)

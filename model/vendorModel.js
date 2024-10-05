@@ -66,14 +66,23 @@ const vendorSchema = new mongoose.Schema({
     enum: ["active", "pending", "blocked", "rejected"],
     default: "pending",
   },
-  notification : {
-    type : Array,
-    default : []
+  notification: {
+    type: Array,
+    default: [],
   },
   createdAt: {
     type: Date,
     default: Date.now,
   },
+  approveAt: {
+    type: Date,
+    default: "",
+  },
+  service: [
+    {
+      serviceName: String,
+    },
+  ],
 });
 
 const Vendor = mongoose.model("vendors", vendorSchema);

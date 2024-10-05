@@ -2,18 +2,10 @@ import Category from "../model/categoryModel.js";
 
 export const createACategory = async (req, res) => {
   try {
-    const { category, slug } = req.body;
+    const { category, photo } = req.body;
 
-    // Check if category already exists
-    const categoryExists = await Category.findOne({ slug });
-    if (categoryExists) {
-      return res.status(400).json({
-        status: "fail",
-        message: "Category with the same slug already exists.",
-      });
-    }
     // Create a new category
-    const newCategory = new Category({ category, slug });
+    const newCategory = new Category({ category, photo });
     const result = await newCategory.save();
 
     res.status(201).json({
@@ -30,11 +22,10 @@ export const createACategory = async (req, res) => {
 };
 export const getSingleCategory = async (req, res) => {
   try {
-    const { slug } = req.query;
-    
+    const { id } = req.params;
 
     // find category
-    const category = await Category.findOne({ slug });
+    const category = await Category.findOne({ _id: id });
     if (!category) {
       return res.status(404).json({
         status: "fail",
@@ -71,11 +62,11 @@ export const getAllCategory = async (req, res) => {
 };
 export const updateACategory = async (req, res) => {
   try {
-    const { category, slug } = req.body;
+    const { category, _id, photo } = req.body;
     // find the category
     const result = await Category.findOneAndUpdate(
-      { slug },
-      { category },
+      { _id },
+      { category, photo },
       { new: true, runValidators: true }
     );
     if (!result) {
@@ -98,9 +89,9 @@ export const updateACategory = async (req, res) => {
 };
 export const deleteACategory = async (req, res) => {
   try {
-    const { slug } = req.query;
+    const { id } = req.params;
     // find the category
-    const result = await Category.findOneAndDelete({ slug });
+    const result = await Category.findOneAndDelete({ _id : id});
     if (!result) {
       return res.status(404).json({
         status: "fail",

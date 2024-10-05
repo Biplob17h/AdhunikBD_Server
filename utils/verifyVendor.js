@@ -4,24 +4,26 @@ import User from "../model/userModel.js";
 import Vendor from "../model/vendorModel.js";
 const verifyVendor = async (req, res, next) => {
   try {
-    // get token 
+    // get token
     const token = await req.headers?.authorization?.split(" ")[1];
-    if (!token) {
-      return res.json({
-        status: "fail",
-        error: "authentication error Please re login",
-      });
-    }
 
-    const decode = await promisify(jwt.verify)(
+    // verify token
+    const decoded = await promisify(jwt.verify)(
       token,
       process.env.JWT_TOKEN_SECRET
     );
+    const vendor = await Vendor.findById({ _id: decoded.userId }).select([
+      "-_id",
+      "-password",
+    ]);
 
-    const user = await Vendor.findOne({ phone: decode?.phone });
-
-    req.user = user;
-
+    if (!vendor) {
+      return res.status(404).json({
+        status: "fail",
+        message: "Vendor not found",
+      });
+    }
+    req.vendor = vendor;
     next();
   } catch (error) {
     res.status(400).json({
