@@ -3,42 +3,13 @@ import { increaseTotalOrder } from "../utils/counterFunctions.js";
 
 const createAOrder = async (req, res) => {
   try {
-    const {
-      serviceId,
-      date,
-      time,
-      location,
-      area,
-      rode,
-      house,
-      phone,
-      customerPhone,
-      email,
-      problem,
-      coupon,
-    } = req.body;
-    const newOrder = new Order({
-      serviceId,
-      date,
-      time,
-      location,
-      area,
-      rode,
-      house,
-      phone,
-      customerPhone,
-      email,
-      problem,
-      coupon,
-    });
+    const newOrder = new Order(req.body);
     const order = await newOrder.save();
-    // add a order to counter
-    increaseTotalOrder();
 
     // send response
     res.status(201).json({
       status: "success",
-      newOrder,
+      order,
     });
   } catch (error) {
     res.status(404).json({
@@ -50,7 +21,9 @@ const createAOrder = async (req, res) => {
 
 const getAOrder = async (req, res) => {
   try {
-    const order = await Order.findById({ _id: req.params.id });
+    const order = await Order.findById({ _id: req.params.id }).populate([
+      "service",
+    ]);
     if (!order) {
       return res.status(404).json({
         status: "fail",
@@ -71,7 +44,7 @@ const getAOrder = async (req, res) => {
 
 const getAllOrders = async (req, res) => {
   try {
-    const orders = await Order.find({});
+    const orders = await Order.find({}).populate(["service", "user"]);
     res.status(200).json({
       status: "success",
       orders,
@@ -86,22 +59,11 @@ const getAllOrders = async (req, res) => {
 
 const updateAOrder = async (req, res) => {
   try {
-    const {
-      date,
-      time,
-      location,
-      area,
-      rode,
-      house,
-      customerPhone,
-      email,
-      problem,
-      coupon,
-    } = req.body;
+    console.log(req.body);
     const order = await Order.findByIdAndUpdate(
       { _id: req.params.id },
       req.body,
-      { new: true, runValidators: true }
+      { new: true }
     );
     if (!order) {
       return res.status(404).json({

@@ -1,13 +1,43 @@
 import mongoose from "mongoose";
 
 const orderSchema = new mongoose.Schema({
-  serviceId: {
+  service: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Service",
+  },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "users",
+  },
+  vendor: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Reviews",
+    default: null,
+  },
+  review: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Reviews",
+    default: null,
+  },
+  ticket: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Tickets",
+    default: null,
   },
   phone: {
     type: String,
     required: true,
+  },
+  customerName: {
+    type: String,
+    required: true,
+  },
+  customerPhone: {
+    type: String,
+    required: true,
+  },
+  customerEmail: {
+    type: String,
   },
   date: {
     type: String,
@@ -33,53 +63,26 @@ const orderSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  customerPhone: {
-    type: String,
-    required: true,
-  },
-  customerEmail: {
-    type: String,
-  },
   problem: {
     type: String,
     required: true,
   },
-  vendorId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "vendors",
-    default: null,
-  },
-  vendorAcceptedStatus: {
-    type: String,
-    default: "not set",
-    enum: ["not set", "pending", "accepted", "rejected"],
-  },
-  reviewId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Reviews",
-    default: null,
-  },
-  ticketId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Tickets",
-    default: null,
-  },
   status: {
     type: String,
     default: "new",
-    enum: ["new", "pending", "accepted", "served", "completed", "cancelled"],
+    enum: [
+      "new",
+      "assigned",
+      "rejected",
+      "accepted",
+      "served",
+      "completed",
+      "cancelled",
+    ],
   },
   coupon: {
     type: String,
     default: "working on it, this function will be at later",
-  },
-  orderAt: {
-    type: Date,
-    default: Date.now(),
-  },
-  completedAt: {
-    type: Date,
-    default: "",
   },
   vendorParseint: {
     type: Number,
@@ -88,6 +91,22 @@ const orderSchema = new mongoose.Schema({
   discount: {
     type: Number,
     default: 0,
+  },
+  totalPrice: {
+    type: Number,
+    default: 0,
+  },
+  orderAt: {
+    type: Date,
+    default: Date.now(),
+  },
+  updateAt: {
+    type: Date,
+    default: Date.now(),
+  },
+  completedAt: {
+    type: Date,
+    default: null,
   },
 });
 
